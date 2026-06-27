@@ -3,12 +3,13 @@
 import { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps
+  extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "ghost" | "danger";
   loading?: boolean;
 }
 
-export default function Button({
+export function Button({
   variant = "primary",
   loading,
   className,
@@ -48,3 +49,5 @@ export default function Button({
     </button>
   );
 }
+
+export default Button;

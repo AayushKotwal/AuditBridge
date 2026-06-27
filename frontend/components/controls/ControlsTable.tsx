@@ -1,111 +1,88 @@
 "use client";
 
-import StatusBadge from "./StatusBadge";
+import { useMemo } from "react";
 
-interface Control {
-  id: number;
-  control_id: string;
-  title: string;
-  description?: string;
-  framework: string;
-  status: string;
-  review_frequency: string;
-  owner_id?: number | null;
-}
+import DataTable from "@/components/ui/data-table/DataTable";
 
-interface Props {
+import controlColumns, {
+  Control,
+} from "./ControlColumns";
+
+interface ControlsTableProps {
   controls: Control[];
+
+  search: string;
+
+  framework: string;
+
+  status: string;
+
+  onEdit: (control: Control) => void;
+
+  onDelete: (control: Control) => void;
 }
 
 export default function ControlsTable({
   controls,
-}: Props) {
-  return (
-    <div
-    className="
-    rounded-2xl
-    border
-    border-zinc-800
-    bg-zinc-950/70
-    backdrop-blur-xl
-    overflow-hidden
-    shadow-xl
-    shadow-black/20
-    "
-    >
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-zinc-800">
-            <th className="text-left p-4 text-zinc-400">
-              Control ID
-            </th>
 
-            <th className="text-left p-4 text-zinc-400">
-              Title
-            </th>
+  search,
 
-            <th className="text-left p-4 text-zinc-400">
-              Framework
-            </th>
+  framework,
 
-            <th className="text-left p-4 text-zinc-400">
-              Review
-            </th>
+  status,
 
-            <th className="text-left p-4 text-zinc-400">
-              Status
-            </th>
-          </tr>
-        </thead>
+  onEdit,
 
-        <tbody>
-          {controls.map((control) => (
-            <tr
-              key={control.id}
-              className="
-                border-b
-                border-zinc-800/50
-                hover:bg-zinc-800/30
-                transition
-              "
-            >
-              <td className="p-4 font-medium">
-                {control.control_id}
-              </td>
+  onDelete,
+}: ControlsTableProps) {
+  const filteredControls = useMemo(() => {
+    return controls.filter((control) => {
+      const matchesSearch =
+        search === "" ||
+        control.control_id
+          .toLowerCase()
+          .includes(search.toLowerCase()) ||
+        control.title
+          .toLowerCase()
+          .includes(search.toLowerCase()) ||
+        control.description
+          .toLowerCase()
+          .includes(search.toLowerCase());
 
-              <td className="p-4">
-                <div className="font-medium">
-                  {control.title}
-                </div>
+      const matchesFramework =
+        framework === "" ||
+        control.framework === framework;
 
-                {control.description && (
-                  <div className="text-xs text-zinc-500 mt-1">
-                    {control.description}
-                  </div>
-                )}
-              </td>
+      const matchesStatus =
+        status === "" ||
+        control.status === status;
 
-              <td className="p-4">
-                {control.framework}
-              </td>
+      return (
+        matchesSearch &&
+        matchesFramework &&
+        matchesStatus
+      );
+    });
+  }, [
+    controls,
+    search,
+    framework,
+    status,
+  ]);
 
-              <td className="p-4">
-                {control.review_frequency}
-              </td>
-
-              <td className="p-4">
-                <StatusBadge status={control.status} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {controls.length === 0 && (
-        <div className="p-10 text-center text-zinc-500">
-          No controls found.
-        </div>
-      )}
-    </div>
+  const columns = useMemo(
+    () =>
+      controlColumns({
+        onEdit,
+        onDelete,
+      }),
+    [onEdit, onDelete]
   );
+
+  return (
+    <DataTable
+    columns={columns}
+    data={filteredControls}
+  />
+);
 }
