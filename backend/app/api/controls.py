@@ -9,6 +9,7 @@ from app.database.database import get_db
 from app.schemas.control import (
     ControlCreate,
     ControlResponse,
+    PaginatedControlsResponse,
 )
 
 from app.services.control_service import (
@@ -16,7 +17,9 @@ from app.services.control_service import (
     get_all_controls,
     get_control_by_id,
     get_next_control_id,
-    search_controls
+    search_controls,
+    update_control,
+    delete_control,
 )
 
 router = APIRouter(
@@ -46,14 +49,18 @@ def next_control_id(
     return get_next_control_id(db)
 
 
-@router.get(
-    "/",
-    response_model=list[ControlResponse],
-)
+@router.get("/",
+response_model=PaginatedControlsResponse,)
 def list_controls(
+    page: int = 1,
+    page_size: int = 10,
     db: Session = Depends(get_db),
 ):
-    return get_all_controls(db)
+    return get_all_controls(
+        db,
+        page=page,
+        page_size=page_size,
+    )
 
 
 @router.get("/search")
@@ -87,3 +94,49 @@ def get_single_control(
         )
 
     return control
+
+@router.put(
+    "/{control_id}",
+    response_model=ControlResponse,
+)
+def edit_control(
+    control_id: int,
+    control: ControlCreate,
+    db: Session = Depends(get_db),
+):
+    updated = update_control(
+        db,
+        control_id,
+        control,
+    )
+
+    if not updated:
+        raise HTTPException(
+            status_code=404,
+            detail="Control not found",
+        )
+
+    return updated
+
+
+@router.delete(
+    "/{control_id}",
+)
+def remove_control(
+    control_id: int,
+    db: Session = Depends(get_db),
+):
+    deleted = delete_control(
+        db,
+        control_id,
+    )
+
+    if not deleted:
+        raise HTTPException(
+            status_code=404,
+            detail="Control not found",
+        )
+
+    return {
+        "message": "Control deleted successfully",
+    }

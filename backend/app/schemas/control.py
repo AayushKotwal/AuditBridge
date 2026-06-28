@@ -24,3 +24,11 @@ class ControlResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class PaginatedControlsResponse(BaseModel):
+    items: list[ControlResponse]
+    total: int
+    page: int
+    page_size: int
+    pages: int

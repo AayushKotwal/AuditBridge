@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 
 interface ControlFormProps {
+  isEditing?: boolean;
+
   initialData: {
     control_id: string;
     title: string;
@@ -31,6 +33,7 @@ export default function ControlForm({
   onSubmit,
   onCancel,
   loading = false,
+  isEditing= false,
 }: ControlFormProps) {
   const [form, setForm] = useState(initialData);
 
@@ -190,7 +193,13 @@ export default function ControlForm({
             disabled:opacity-60
           "
         >
-          {loading ? "Creating..." : "Create Control"}
+          {loading
+              ? isEditing
+              ? "Saving..."
+              : "Creating..."
+              : isEditing
+              ? "Save Changes"
+              : "Create Control"}
         </button>
       </div>
     </form>
